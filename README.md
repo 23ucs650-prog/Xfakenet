@@ -1,12 +1,11 @@
 # XFakeNet: a cross-modal explainable fake news detector
 
-B.Tech Project, 15 October – 15 November 2026 · [Your name, roll number] · Mentor: [Mentor name]
+
 
 XFakeNet classifies a statement as **Fabricated, Misleading or Credible**, shows **which words and which clause** drove
 the verdict, and, given an image, checks whether the **image contradicts the headline**.
 
-- **Live demo:** [Hugging Face Space link]
-- **Final report:** [report link]
+
 
 ## Results at a glance
 
