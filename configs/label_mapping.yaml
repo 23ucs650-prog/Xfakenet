@@ -1,0 +1,38 @@
+# XFakeNet five-class label mapping (frozen 2026-10-21, Week 1)
+# Every later step (training, augmentation, evaluation) reads this file.
+# Change it only with a note in docs/label_mapping.md and a full retrain.
+
+# Three-class setup (changed 20 Oct 2026): Satire/Propaganda dropped because the
+# only available source (TSHP-17) taught the model website style, not the class
+# (Propaganda F1 0.99 on same-site validation, 0.08 on unseen-site test).
+# For the old five-class setup use:
+#   classes: [Fabricated, Misleading, Satire, Propaganda, Credible]
+#   and set extra_classes.enabled: true in week1.yaml
+classes: [Fabricated, Misleading, Credible]   # index order = model label ids
+
+liar:
+  # LIAR's six PolitiFact truth ratings -> XFakeNet classes
+  # Keys are quoted on purpose: unquoted true/false become YAML booleans.
+  "pants-fire":  Fabricated
+  "false":       Fabricated
+  "barely-true": Misleading
+  "half-true":   Misleading
+  "mostly-true": Credible
+  "true":        Credible
+
+# LIAR has no Satire or Propaganda signal. These two classes come from an
+# external labelled source (default: TSHP-17, Rashkin et al. 2017).
+tshp17:
+  # TSHP-17 integer labels: 1=Satire 2=Hoax 3=Propaganda 4=Trusted
+  1: Satire
+  3: Propaganda
+  # 2 (Hoax) and 4 (Trusted) are NOT used by default: they would add
+  # long-article Fabricated/Credible examples whose style differs from LIAR.
+  # Set use_hoax_trusted: true in configs/week1.yaml to include them.
+  2: Fabricated
+  4: Credible
+
+fakenewsnet:
+  # Binary only; used for C-score calibration/evaluation, not five-class training.
+  "fake": Fabricated
+  "real": Credible

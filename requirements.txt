@@ -1,0 +1,17 @@
+# Tested on Google Colab (Python 3.13, NVIDIA T4). Install torch separately for your CUDA version.
+transformers>=4.44
+datasets
+scikit-learn
+pandas
+numpy
+pyyaml
+requests
+beautifulsoup4
+pillow
+scipy
+matplotlib
+nltk
+sentence-transformers
+google-genai
+gradio
+joblib

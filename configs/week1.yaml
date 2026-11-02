@@ -1,0 +1,125 @@
+seed: 42
+paths:
+  raw: data/raw
+  processed: data/processed
+  images: data/images
+  runs: runs
+
+liar:
+  dir: data/raw/liar            # expects train.tsv / valid.tsv / test.tsv
+
+extra_classes:
+  enabled: false      # three-class setup: LIAR only
+  source: tshp17
+  file: data/raw/tshp17/fulltrain.csv   # columns: label,text (no header)
+  test_file: data/raw/tshp17/balancedtest.csv
+  use_hoax_trusted: false
+  # Articles are long; LIAR statements are ~18 words. Truncate to the first
+  # sentences up to this many words so length is not a shortcut for the class.
+  max_words: 40
+  # Cap per class so Satire/Propaganda stay minority classes (as in the outline).
+  max_per_class: 1500
+
+fakenewsnet:
+  dir: data/raw/FakeNewsNet/dataset
+  sample_size: 1000            # articles to try for images (balanced fake/real)
+  min_image_side: 100          # px; smaller images (icons, pixels) are discarded
+  workers: 16
+  timeout: 10
+  use_wayback: true
+
+baseline:
+  model: roberta-base
+  max_len: 64
+  epochs: 4
+  batch_size: 32
+  lr: 2.0e-5
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  fp16: true
+
+# ---------------- Week 2 ----------------
+augmentation:                  # final training mix (week 3): 70% original / 15% / 15%
+  original_share: 70
+  textfooler_share: 15
+  paraphrase_share: 15
+
+cscore:
+  clip_model: openai/clip-vit-base-patch32
+  batch_size: 64
+  percentile: 95               # alternative threshold: 95th percentile of aligned C-scores (valid)
+  out_dir: results/cscore
+
+paraphrase:
+  models: [gemini-3.5-flash-lite, gemini-3.8-flash, gemini-3.1-flash-lite, gemini-2.5-flash]
+  batch_size: 20               # statements per API call
+  temperature: 0.9
+  sleep_s: 4                   # pause between calls (free-tier rate limits)
+  test_n: 500
+  out_train: data/augment/paraphrase_train.jsonl
+  out_test: data/augment/paraphrase_test.jsonl
+
+textfooler:
+  victim_dir: runs/baseline/best
+  embeddings_url: https://github.com/nmrksic/counter-fitting/raw/master/word_vectors/counter-fitted-vectors.txt.zip
+  embeddings_path: data/raw/counter-fitted-vectors.txt.zip
+  sim_model: sentence-transformers/all-MiniLM-L6-v2
+  k: 50                        # synonyms per word (paper: 50)
+  sim_threshold: 0.80
+  max_change: 0.25             # at most 25% of words replaced
+  query_budget: 2000
+  test_n: 500
+  out_train: data/augment/textfooler_train.jsonl
+  out_test: data/augment/textfooler_test.jsonl
+
+model_v1:
+  lrs: [1.0e-5, 2.0e-5, 3.0e-5]
+  epochs: 5
+
+# ---------------- Week 3 ----------------
+xfakenet:                      # RoBERTa + jointly trained token/segment attention
+  encoder: roberta-base
+  max_len: 64
+  max_segments: 8
+  att_dim: 256
+  epochs: 4
+  batch_size: 32
+  lr: 2.0e-5                   # encoder
+  head_lr: 1.0e-4              # attention layers + classifier
+  warmup_ratio: 0.06
+  weight_decay: 0.01
+  highlight_threshold: 0.65    # outline: tokens above T = 0.65 are highlighted
+
+modality:
+  C: 0.1                       # regularisation of the text/image logistic models (389 items)
+
+week3:
+  out_dir: results/week3
+
+# ---------------- Week 4 ----------------
+week4:
+  out_dir: results/week4
+
+deception:
+  n_mismatched: 200            # shuffled pairs added to the 389 real ones for labelling
+  batch_size: 5                # image-text pairs per Gemini call
+  image_side: 512
+  sleep_s: 4
+  C: 0.5
+  min_per_class: 5
+  handcheck_n: 100
+  labels: data/deception/gemini_labels.jsonl
+  features: data/deception/clip_features.npz
+  oof: data/deception/classifier_oof.csv
+  model: runs/deception_clf.joblib
+  handcheck_sample: data/deception/handcheck_sample.csv
+  handcheck_results: data/deception/handcheck_results.csv
+
+pipeline:
+  modality_model: runs/modality.joblib
+
+explain:                       # faithful explanations (week 4 fix)
+  permutations_gpu: 10
+  permutations_cpu: 6
+  cpu_statements: 400
+  chunk: 50

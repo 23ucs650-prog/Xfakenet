@@ -1,0 +1,34 @@
+{
+  "n": 389,
+  "cscore_threshold": 0.7534,
+  "fake_vs_real_auc_5fold": {
+    "text_only": 0.7836,
+    "image_only": 0.6598,
+    "cscore_only": 0.4292,
+    "text+image": 0.7837,
+    "text+image+cscore": 0.7827
+  },
+  "flag_counts": {
+    "TEXT": 277,
+    "CROSS-MODAL": 65,
+    "IMAGE": 47
+  },
+  "flag_by_label": {
+    "CROSS-MODAL": {
+      "fake": 28,
+      "real": 37
+    },
+    "IMAGE": {
+      "fake": 21,
+      "real": 26
+    },
+    "TEXT": {
+      "fake": 144,
+      "real": 133
+    }
+  },
+  "fusion_weights": {
+    "text": 1.074,
+    "image": 0.3073
+  }
+}

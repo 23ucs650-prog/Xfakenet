@@ -1,0 +1,49 @@
+{
+  "n_labelled": 589,
+  "label_counts": {
+    "consistent": 330,
+    "misattributed_entity": 127,
+    "irrelevant_stock": 117,
+    "manipulated_or_synthetic": 8,
+    "out_of_context": 5,
+    "exaggeration": 1,
+    "wrong_location_or_event": 1
+  },
+  "label_counts_by_pair_type": {
+    "aligned": {
+      "consistent": 321,
+      "exaggeration": 1,
+      "irrelevant_stock": 48,
+      "manipulated_or_synthetic": 6,
+      "misattributed_entity": 10,
+      "out_of_context": 3,
+      "wrong_location_or_event": 0
+    },
+    "mismatched": {
+      "consistent": 9,
+      "exaggeration": 0,
+      "irrelevant_stock": 69,
+      "manipulated_or_synthetic": 2,
+      "misattributed_entity": 117,
+      "out_of_context": 2,
+      "wrong_location_or_event": 1
+    }
+  },
+  "classifier_classes": [
+    "misattributed_entity",
+    "irrelevant_stock",
+    "manipulated_or_synthetic",
+    "out_of_context"
+  ],
+  "dropped_rare_classes": {
+    "exaggeration": 1,
+    "wrong_location_or_event": 1
+  },
+  "classifier_cv": {
+    "n": 257,
+    "folds": 5,
+    "accuracy": 0.8132,
+    "macro_f1": 0.4593,
+    "majority_class_accuracy": 0.4942
+  }
+}

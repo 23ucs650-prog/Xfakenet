@@ -1,0 +1,63 @@
+{
+  "clip_model": "openai/clip-vit-base-patch32",
+  "n_pairs": {
+    "aligned": 389,
+    "mismatched": 389,
+    "valid_headlines": 194,
+    "test_headlines": 195
+  },
+  "cscore_distribution": {
+    "aligned": {
+      "mean": 0.7013,
+      "std": 0.0592,
+      "min": 0.576,
+      "max": 0.9197
+    },
+    "mismatched": {
+      "mean": 0.8233,
+      "std": 0.0444,
+      "min": 0.6944,
+      "max": 0.9556
+    }
+  },
+  "test_auc_aligned_vs_mismatched": 0.9404,
+  "thresholds": {
+    "youden_on_valid": {
+      "threshold": 0.7534,
+      "accuracy": 0.8795,
+      "f1_mismatch": 0.8867,
+      "precision": 0.8364,
+      "recall": 0.9436,
+      "flag_rate_aligned": 0.1846,
+      "flag_rate_mismatched": 0.9436
+    },
+    "p95_aligned_valid": {
+      "threshold": 0.8113,
+      "accuracy": 0.7821,
+      "f1_mismatch": 0.7385,
+      "precision": 0.9231,
+      "recall": 0.6154,
+      "flag_rate_aligned": 0.0513,
+      "flag_rate_mismatched": 0.6154
+    },
+    "proposal_0.62": {
+      "threshold": 0.62,
+      "accuracy": 0.5231,
+      "f1_mismatch": 0.6771,
+      "precision": 0.5118,
+      "recall": 1.0,
+      "flag_rate_aligned": 0.9538,
+      "flag_rate_mismatched": 1.0
+    }
+  },
+  "chosen_threshold": 0.7534,
+  "fake_vs_real_aligned": {
+    "mean_cscore_fake": 0.6968,
+    "mean_cscore_real": 0.7058,
+    "auc_cscore_predicts_fake": 0.4292
+  },
+  "by_site_test_auc": {
+    "gossipcop": 0.9592,
+    "politifact": 0.8908
+  }
+}
