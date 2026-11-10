@@ -76,9 +76,9 @@ def encode(tok, texts: Sequence[str], max_len: int, max_segments: int, device=No
     return enc, offsets, spans_all
 
 
-def build(encoder_name: str, num_labels: int, max_segments: int, att_dim: int) -> XFakeNetModel:
+def build(encoder_name: str, num_labels: int, max_segments: int, att_dim: int, dropout: float = 0.1) -> XFakeNetModel:
     from transformers import AutoModel
-    return XFakeNetModel(AutoModel.from_pretrained(encoder_name), num_labels, max_segments, att_dim)
+    return XFakeNetModel(AutoModel.from_pretrained(encoder_name), num_labels, max_segments, att_dim, dropout)
 
 
 def save(model: XFakeNetModel, tok, out_dir: str | Path, meta: dict) -> None:

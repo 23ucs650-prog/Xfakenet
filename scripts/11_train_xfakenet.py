@@ -62,12 +62,22 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--out-dir", default=None, help="absolute output folder (e.g. Colab local disk instead of Drive)")
     ap.add_argument("--train-file", default=None, help="override training csv (e.g. round-2 corpus)")
+    ap.add_argument("--lr", type=float, default=None, help="encoder learning rate")
+    ap.add_argument("--head-lr", type=float, default=None, help="attention layers + classifier learning rate")
+    ap.add_argument("--batch-size", type=int, default=None)
+    ap.add_argument("--dropout", type=float, default=None)
+    ap.add_argument("--skip-test", action="store_true", help="grid search: never touch the test set")
     args = ap.parse_args()
 
     cfg = load_config()
     if args.seed is not None:
         cfg["seed"] = args.seed
-    xc = cfg["xfakenet"]
+    xc = dict(cfg["xfakenet"])
+    for key, val in [("lr", args.lr), ("head_lr", args.head_lr), ("batch_size", args.batch_size),
+                     ("dropout", args.dropout)]:
+        if val is not None:
+            xc[key] = val
+    xc.setdefault("dropout", 0.1)
     set_seed(cfg["seed"])
     classes = class_names()
     d = cfg["paths"]["processed"]
@@ -95,7 +105,7 @@ def main() -> None:
 
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup
     tok = AutoTokenizer.from_pretrained(xc["encoder"])
-    model = xm.build(xc["encoder"], len(classes), xc["max_segments"], xc["att_dim"]).to(device)
+    model = xm.build(xc["encoder"], len(classes), xc["max_segments"], xc["att_dim"], xc["dropout"]).to(device)
 
     head = [p_ for n, p_ in model.named_parameters() if not n.startswith("encoder.")]
     enc_params = [p_ for n, p_ in model.named_parameters() if n.startswith("encoder.")]
@@ -107,7 +117,7 @@ def main() -> None:
 
     texts, labels = train["text"].tolist(), train["label_id"].to_numpy()
     import tempfile
-    best_f1, best_epoch = -1.0, -1
+    best_f1, best_epoch, history = -1.0, -1, []
     tmp = Path(tempfile.gettempdir()) / f"{run}_best"   # local disk, not Drive (faster)
     rng = np.random.default_rng(cfg["seed"])
     for ep in range(1, epochs + 1):
@@ -134,6 +144,7 @@ def main() -> None:
         vf1 = f1_score(valid["label_id"], vp, average="macro")
         print(f"[{run}] epoch {ep} done in {time.time() - t0:.0f}s | train loss {run_loss / step:.4f} "
               f"| valid macro-F1 {vf1:.4f}", flush=True)
+        history.append({"epoch": ep, "train_loss": round(run_loss / step, 4), "valid_macro_f1": round(float(vf1), 4)})
         if vf1 > best_f1:
             best_f1, best_epoch = vf1, ep
             xm.save(model, tok, tmp, {})
@@ -142,13 +153,14 @@ def main() -> None:
     model.load_state_dict(torch.load(tmp / "xfakenet.pt", map_location=device))
     meta = {"classes": classes, "encoder": xc["encoder"], "max_len": xc["max_len"],
             "max_segments": xc["max_segments"], "att_dim": xc["att_dim"],
-            "highlight_threshold": xc["highlight_threshold"], "data": args.data, "best_epoch": best_epoch}
+            "highlight_threshold": xc["highlight_threshold"], "data": args.data, "best_epoch": best_epoch,
+            "dropout": xc["dropout"]}
     xm.save(model, tok, out_dir, meta)
     shutil.rmtree(tmp, ignore_errors=True)
 
     results = {"run_name": run, "data": args.data, "seed": cfg["seed"], "train_file": train_file, "train_sources": train["source"].value_counts().to_dict(),
-               "config": xc, "epochs": epochs, "best_epoch": best_epoch, "lr": xc["lr"]}
-    for name, df in [("valid", valid), ("test", test)]:
+               "config": xc, "epochs": epochs, "best_epoch": best_epoch, "lr": xc["lr"], "history": history}
+    for name, df in [("valid", valid)] + ([] if args.skip_test else [("test", test)]):
         pred = predict(model, tok, df["text"].tolist(), xc, device).argmax(-1)
         results[name] = report(df.reset_index(drop=True), pred, classes)
         print(f"[{run}] {name}: acc={results[name]['accuracy']} macro_f1={results[name]['macro_f1']}", flush=True)

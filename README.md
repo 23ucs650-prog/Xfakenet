@@ -23,6 +23,12 @@ LIAR test set (1,283 statements), mean ± std over 3 random seeds. Full tables: 
 - **Image–headline contradiction (C-score):** separates genuine from swapped image pairs with ROC-AUC 0.940 at a
   calibrated threshold of 0.753; it does not by itself separate fake from real FakeNewsNet articles (AUC 0.43).
 - **Augmentation** (15% TextFooler + 15% Gemini paraphrases) roughly doubles accuracy under attack, consistently across seeds.
+- **Hyperparameter grid search** (encoder LR {1,2,3}e-5 × batch size {16,32} × dropout {0.1,0.3} × up to 4 epochs,
+  selected on validation only): all 12 configurations lie within 0.018 validation macro-F1; the default settings rank
+  2nd of 12. Retrained with 3 seeds, the best configuration does not beat the defaults on clean test data
+  (macro-F1 0.451 ± 0.017 vs 0.463 ± 0.003) but is slightly more robust (accuracy under attack 0.138 ± 0.005 vs
+  0.124 ± 0.028), so the defaults were kept. See [`results/grid/grid_summary.md`](results/grid/grid_summary.md) and
+  [`results/grid/tuned_vs_default.md`](results/grid/tuned_vs_default.md).
 
 ## How it works
 
@@ -54,6 +60,7 @@ each step is resumable, so if Colab disconnects, `Runtime → Run all` again con
 | `notebooks/XFakeNet_Week3_Colab.ipynb` | Augmented training, XFakeNet models, robustness, explanations, modality flag | ~1 h |
 | `notebooks/XFakeNet_Week4_Colab.ipynb` | Faithfulness test, deception patterns, pipeline, 3 seeds, final tables | ~2.5 h |
 | `notebooks/XFakeNet_Week4b_Explanations.ipynb` | SHAP vs attention faithfulness; pipeline switched to SHAP | ~15 min |
+| `notebooks/XFakeNet_GridSearch_Colab.ipynb` | Grid search (12 configs) + best config with 3 seeds and TextFooler attack | ~3.5 h |
 | `notebooks/XFakeNet_Demo.ipynb` | Interactive Gradio demo with a temporary public link | ~3 min |
 | `notebooks/XFakeNet_Deploy_HF_Space.ipynb` | Publishes the demo as a permanent Hugging Face Space | ~10 min |
 

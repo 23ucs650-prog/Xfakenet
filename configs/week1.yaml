@@ -123,3 +123,12 @@ explain:                       # faithful explanations (week 4 fix)
   permutations_cpu: 6
   cpu_statements: 400
   chunk: 50
+
+# ---------------- Week 5: grid search (mentor's request) ----------------
+grid:
+  lrs: [1.0e-5, 2.0e-5, 3.0e-5]      # encoder learning rate
+  batch_sizes: [16, 32]
+  dropouts: [0.1, 0.3]
+  max_epochs: 4                       # validation macro-F1 is recorded after every epoch
+  final_seeds: [42, 1, 2]
+  out_dir: results/grid

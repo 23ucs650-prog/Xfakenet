@@ -1,0 +1,10 @@
+{
+  "config": "lr3e-05_bs16_do0.3",
+  "lr": 3e-05,
+  "batch_size": 16,
+  "dropout": 0.3,
+  "best_epoch": 2,
+  "valid_macro_f1": 0.5028,
+  "n_runs": 12,
+  "n_total": 12
+}
